@@ -8,10 +8,7 @@ class StringConverter {
   StringConverter(const std::string &str);
   virtual ~StringConverter();
 
-  char getCharValue() const;
-  int getIntValue() const;
-  float getFloatValue() const;
-  double getDoubleValue() const;
+  void printValues() const;
 
  private:
   static const int kCharIndex = 0;
@@ -26,6 +23,10 @@ class StringConverter {
   int judgeType(const std::string &str);
   void createBaseValue(const std::string &str);
   void convertToOtherTypes();
+  char getCharValue() const;
+  int getIntValue() const;
+  float getFloatValue() const;
+  double getDoubleValue() const;
 
   int type_;
   char char_value_;
