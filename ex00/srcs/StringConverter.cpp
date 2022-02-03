@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 StringConverter::StringConverter(const std::string &str)
     : str_(str), val_type_(kInvalidType), char_val_(0), int_val_(0),
@@ -16,8 +17,8 @@ StringConverter::~StringConverter() {
 void StringConverter::printValues() const {
   std::cout << "char: '" << char_val_ << "'" << std::endl;
   std::cout << "int: " << int_val_ << std::endl;
-  std::cout << "float: " << float_val_ << std::endl;
-  std::cout << "double: " << double_val_ << std::endl;
+  std::cout << "float: " << std::fixed << std::setprecision(1) << float_val_ << "f" << std::endl;
+  std::cout << "double: " << std::setprecision(1) << double_val_ << std::endl;
 }
 
 void StringConverter::setValueType() {
