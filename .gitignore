@@ -1,3 +1,6 @@
+# Target names
+convert
+
 # Prerequisites
 *.d
 
