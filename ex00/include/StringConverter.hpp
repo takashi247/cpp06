@@ -8,31 +8,45 @@ class StringConverter {
   StringConverter(const std::string &str);
   virtual ~StringConverter();
 
+  void setValueType();
+  void createBaseValue();
+  void convertToOtherTypes();
   void printValues() const;
 
  private:
-  static const int kCharIndex = 0;
-  static const int kIntIndex = 1;
-  static const int kFloatIndex = 2;
-  static const int kDoubleIndex = 3;
+  static const int kInvalidType = 0;
+  static const int kCharType = 1;
+  static const int kIntType = 2;
+  static const int kFloatType = 3;
+  static const int kDoubleType = 4;
 
   StringConverter();
   StringConverter(const StringConverter &other);
   StringConverter &operator=(const StringConverter &other);
 
-  int judgeType(const std::string &str);
-  void createBaseValue(const std::string &str);
-  void convertToOtherTypes();
+  bool isChar() const;
+  bool isInt() const;
+  bool isFloat() const;
+  bool isDouble() const;
+  void createCharValue();
+  void createIntValue();
+  void createFloatValue();
+  void createDoubleValue();
+  void convertToChar();
+  void convertToInt();
+  void convertToFloat();
+  void convertToDouble();
   char getCharValue() const;
   int getIntValue() const;
   float getFloatValue() const;
   double getDoubleValue() const;
 
-  int type_;
-  char char_value_;
-  int int_value_;
-  float float_value_;
-  double double_value_;
+  const std::string &str_;
+  int val_type_;
+  char char_val_;
+  int int_val_;
+  float float_val_;
+  double double_val_;
 };
 
 #endif // STRINGCONVERTER_HPP
