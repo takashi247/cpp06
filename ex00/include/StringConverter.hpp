@@ -1,12 +1,15 @@
 #ifndef STRINGCONVERTER_HPP
 #define STRINGCONVERTER_HPP
 
+#include <math.h>
+
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <cstdlib>
 #include <limits>
+#include <cerrno>
 
 class StringConverter {
  public:
@@ -16,6 +19,7 @@ class StringConverter {
   void setValueType();
   void createBaseValue();
   void convertToOtherTypes();
+  void setStringStreams();
   const std::stringstream &getCharOS() const;
   const std::stringstream &getIntOS() const;
   const std::stringstream &getFloatOS() const;
@@ -36,42 +40,28 @@ class StringConverter {
   static const std::string kNonDisplayableMsg;
   static const std::string kImpossibleMsg;
   static const std::string kDecimalPoint;
+  static const std::string kExponent;
 
   StringConverter();
   StringConverter(const StringConverter &other);
   StringConverter &operator=(const StringConverter &other);
 
-  bool isChar() const;
-  bool isInt() const;
-  bool isFloat() const;
-  bool isDouble() const;
-  void createCharValue();
-  void createIntValue();
-  void createFloatValue();
-  void createDoubleValue();
-  void convertChar();
-  void convertCharToInt();
-  void convertCharToFloat();
-  void convertCharToDouble();
-  void convertInt();
-  void convertIntToChar();
-  void convertIntToFloat();
-  void convertIntToDouble();
-  void convertFloat();
-  void convertFloatToChar();
-  void convertFloatToInt();
-  void convertFloatToDouble();
-  void convertDouble();
-  void convertDoubleToChar();
-  void convertDoubleToInt();
-  void convertDoubleToFloat();
-  void setAllImpossible();
-  char getCharValue() const;
-  int getIntValue() const;
-  float getFloatValue() const;
-  double getDoubleValue() const;
+  bool isChar();
+  bool isInt();
+  bool isFloat();
+  bool isDouble();
+  bool isinff();
+  bool isnanf();
+  void setCharSS();
+  void setIntSS();
+  void setFloatSS();
+  void setDoubleSS();
 
   const std::string &str_;
+  long strtol_val_;
+  char* strtol_end_;
+  double strtod_val_;
+  char* strtod_end_;
   int val_type_;
   char char_val_;
   int int_val_;
@@ -81,6 +71,10 @@ class StringConverter {
   std::stringstream int_ss_;
   std::stringstream float_ss_;
   std::stringstream double_ss_;
+  bool is_out_of_range_char;
+  bool is_out_of_range_int;
+  bool is_out_of_range_float;
+  bool is_invalid_input;
 };
 
 std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter);

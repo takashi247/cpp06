@@ -7,11 +7,20 @@ const std::string StringConverter::kDoublePrompt = "double: ";
 const std::string StringConverter::kNonDisplayableMsg = "Non displayable";
 const std::string StringConverter::kImpossibleMsg = "impossible";
 const std::string StringConverter::kDecimalPoint = ".";
+const std::string StringConverter::kExponent="e";
 
 StringConverter::StringConverter(const std::string &str)
-    : str_(str), val_type_(kInvalidType), char_val_(), int_val_(),
-      float_val_(), double_val_(), char_ss_(), int_ss_(),
-      float_ss_(), double_ss_() {
+    : str_(str), strtol_val_(), strtol_end_(NULL), strtod_val_(),
+      strtod_end_(NULL), val_type_(), char_val_(), int_val_(),
+      float_val_(), double_val_(), char_ss_(), int_ss_(), float_ss_(),
+      double_ss_(), is_out_of_range_char(false), is_out_of_range_int(false),
+      is_out_of_range_float(false), is_invalid_input(false) {
+  strtod_val_ = std::strtod(str_.c_str(), &strtod_end_);
+  if (errno == ERANGE && strtod_val_ == HUGE_VAL) {
+    is_invalid_input = true;
+    errno = 0;
+  }
+  strtol_val_ = std::strtol(str_.c_str(), &strtol_end_, kBase);
   char_ss_ << kCharPrompt;
   int_ss_ << kIntPrompt;
   float_ss_ << kFloatPrompt;
@@ -29,7 +38,9 @@ const std::stringstream &StringConverter::getFloatOS() const { return float_ss_;
 const std::stringstream &StringConverter::getDoubleOS() const { return double_ss_; }
 
 void StringConverter::setValueType() {
-  if (isChar()) {
+  if (is_invalid_input) {
+    val_type_ = kInvalidType;
+  } else if (isChar()) {
     val_type_ = kCharType;
   } else if (isInt()) {
     val_type_ = kIntType;
@@ -37,139 +48,134 @@ void StringConverter::setValueType() {
     val_type_ = kFloatType;
   } else if (isDouble()) {
     val_type_ = kDoubleType;
+  } else {
+    val_type_ = kInvalidType;
+    is_invalid_input = true;
   }
   // for debug
   std::cout << val_type_ << std::endl;
 }
 
-bool StringConverter::isChar() const {
-  // if the given string is NULL
-  if (str_.length() == 0) {
+bool StringConverter::isChar() {
+  if ((str_.length() == 0) || (str_.length() == 1 && !std::isdigit(str_[0]))) {
     return true;
+  } else {
+    if (strtol_val_ < static_cast<long>(std::numeric_limits<char>::min())
+        || static_cast<long>(std::numeric_limits<char>::max()) < strtol_val_
+        || strtod_val_ < static_cast<double>(std::numeric_limits<char>::min())
+        || static_cast<double>(std::numeric_limits<char>::max() < strtod_val_)
+        || isnan(strtod_val_) || isinf(strtod_val_)) {
+      is_out_of_range_char = true;
+    }
+    return false;
   }
-  // len == 1 and NOT a digit
-  if (str_.length() == 1 && !std::isdigit(str_[0])) {
-    return true;
-  }
-  return false;
 }
 
-bool StringConverter::isInt() const {
-  char *str_end;
-  long tmp = std::strtol(str_.c_str(), &str_end, kBase);
-  if (!*str_end && std::numeric_limits<int>::min() <= tmp && tmp <= std::numeric_limits<int>::max()) {
+bool StringConverter::isInt() {
+  if (strtol_val_ < static_cast<long>(std::numeric_limits<int>::min())
+      || static_cast<long>(std::numeric_limits<int>::max() < strtol_val_)
+      || strtod_val_ < static_cast<double>(std::numeric_limits<int>::min())
+      || static_cast<double>(std::numeric_limits<int>::max() < strtod_val_)
+      || isnan(strtod_val_) || isinf(strtod_val_)) {
+    is_out_of_range_int = true;
+    return false;
+  } else if (*strtol_end_) {
+    return false;
+  } else {
     return true;
   }
-  return false;
 }
 
-bool StringConverter::isFloat() const {
-  // char *str_end;
-  // double tmp = std::strtod(str_.c_str(), &str_end);
-  // if ()
-  return false;
+bool StringConverter::isinff() {
+  return (isinf(strtod_val_) && *strtod_end_ && *strtod_end_ == 'f'
+          && !*(strtod_end_ + 1));
 }
 
-bool StringConverter::isDouble() const {
-  // need to implement
-  return false;
+bool StringConverter::isnanf() {
+  return (isnan(strtod_val_) && *strtod_end_ && *strtod_end_ == 'f'
+          && !*(strtod_end_ + 1));
+}
+
+bool StringConverter::isFloat() {
+  double strtod_abs_val = strtod_val_ < 0 ? -strtod_val_ : strtod_val_;
+  if (strtod_abs_val < static_cast<double>(std::numeric_limits<float>::min())
+      && static_cast<double>(std::numeric_limits<float>::max()) < strtod_abs_val) {
+    is_out_of_range_float = true;
+    return false;
+  } else if (*strtod_end_ != 'f') {
+    return false;
+  } else if (isinff() || isnanf() || (*strtod_end_ == 'f' && !*(strtod_end_ + 1))) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool StringConverter::isDouble() {
+  if (!*strtod_end_ || *strtod_end_ == 'e' || *strtod_end_ == 'E') {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 void StringConverter::createBaseValue() {
   switch (val_type_) {
     case kCharType:
-      createCharValue();
+      char_val_ = str_.c_str()[0];
       break;
     case kIntType:
-      createIntValue();
+      int_val_ = std::atoi(str_.c_str());
       break;
     case kFloatType:
-      createFloatValue();
+      float_val_ = static_cast<float>(strtod_val_);
       break;
     case kDoubleType:
-      createDoubleValue();
+      double_val_ = strtod_val_;
       break;
     default:
       break;
   }
-}
-
-void StringConverter::createCharValue() {
-  char_val_ = static_cast<char>(str_[0]);
-  if (std::isprint(str_[0])) {
-    char_ss_ <<"'" << char_val_ << "'";
-  } else {
-    char_ss_ << kNonDisplayableMsg;
-  }
-}
-
-void StringConverter::createIntValue() {
-  int_val_ = std::atoi(str_.c_str());
-  int_ss_ << int_val_;
-}
-
-void StringConverter::createFloatValue() {
-  // need to implement
-  return ;
-}
-
-void StringConverter::createDoubleValue() {
-  // need to implement
-  return ;
 }
 
 void StringConverter::convertToOtherTypes() {
   switch (val_type_) {
     case kCharType:
-      convertChar();
+      int_val_ = static_cast<int>(char_val_);
+      float_val_ = static_cast<float>(char_val_);
+      double_val_ = static_cast<double>(char_val_);
       break;
     case kIntType:
-      convertInt();
+      char_val_ = static_cast<char>(int_val_);
+      float_val_ = static_cast<float>(int_val_);
+      double_val_ = static_cast<double>(int_val_);
       break;
     case kFloatType:
-      convertFloat();
+      char_val_ = static_cast<char>(float_val_);
+      int_val_ = static_cast<int>(float_val_);
+      double_val_ = static_cast<double>(float_val_);
       break;
     case kDoubleType:
-      convertDouble();
+      char_val_ = static_cast<char>(double_val_);
+      int_val_ = static_cast<int>(double_val_);
+      float_val_ = static_cast<float>(double_val_);
       break;
     default:
-      setAllImpossible();
       break;
   }
 }
 
-void StringConverter::convertChar() {
-  convertCharToInt();
-  convertCharToFloat();
-  convertCharToDouble();
+void StringConverter::setStringStreams() {
+  setCharSS();
+  setIntSS();
+  setFloatSS();
+  setDoubleSS();
 }
 
-void StringConverter::convertCharToInt() {
-  int_val_ = static_cast<int>(char_val_);
-  int_ss_ << int_val_;
-}
-
-void StringConverter::convertCharToFloat() {
-  float_val_ = static_cast<float>(char_val_);
-  float_ss_ << float_val_ << ".0f";
-}
-
-void StringConverter::convertCharToDouble() {
-  double_val_ = static_cast<double>(char_val_);
-  double_ss_ << double_val_ << ".0";
-}
-
-void StringConverter::convertInt() {
-  convertIntToChar();
-  convertIntToFloat();
-  convertIntToDouble();
-}
-
-void StringConverter::convertIntToChar() {
-  if (int_val_ < std::numeric_limits<char>::min() || std::numeric_limits<char>::max() < int_val_) {
+void StringConverter::setCharSS() {
+  if (is_invalid_input || is_out_of_range_char) {
     char_ss_ << kImpossibleMsg;
   } else {
-    char_val_ = static_cast<char>(int_val_);
     if (std::isprint(static_cast<unsigned char>(char_val_))) {
       char_ss_ << "'" << char_val_ << "'";
     } else {
@@ -178,69 +184,42 @@ void StringConverter::convertIntToChar() {
   }
 }
 
-void StringConverter::convertIntToFloat() {
-  float_val_ = static_cast<float>(int_val_);
-  float_ss_ << float_val_;
-  std::string str_float_val_ = float_ss_.str();
-  std::size_t found = str_float_val_.find(kDecimalPoint);
-  if (found == std::string::npos) {
-    float_ss_ << ".0f";
+void StringConverter::setIntSS() {
+  if (is_invalid_input || is_out_of_range_int) {
+    int_ss_ << kImpossibleMsg;
   } else {
-    float_ss_ << "f";
+    int_ss_ << int_val_;
   }
 }
 
-void StringConverter::convertIntToDouble() {
-  double_val_ = static_cast<double>(int_val_);
-  double_ss_ << double_val_;
-  std::string str_double_val_ = double_ss_.str();
-  std::size_t found = str_double_val_.find(kDecimalPoint);
-  if (found == std::string::npos) {
-    double_ss_ << ".0";
+void StringConverter::setFloatSS() {
+  if (is_invalid_input || is_out_of_range_float) {
+    float_ss_ << kImpossibleMsg;
+  } else {
+    float_ss_ << float_val_;
+    std::string str_float_val_ = float_ss_.str();
+    if (str_float_val_.find(kDecimalPoint, kFloatPrompt.length()) == std::string::npos
+        && str_float_val_.find(kExponent, kFloatPrompt.length()) == std::string::npos
+        && !isnan(float_val_) && !isinf(float_val_)) {
+      float_ss_ << ".0f";
+    } else {
+      float_ss_ << "f";
+    }
   }
 }
 
-void StringConverter::convertFloat() {
-  convertFloatToChar();
-  convertFloatToInt();
-  convertFloatToDouble();
-}
-
-void StringConverter::convertFloatToChar() {
-  // need to implement
-}
-
-void StringConverter::convertFloatToInt() {
-  // need to implement
-}
-
-void StringConverter::convertFloatToDouble() {
-  // need to implement
-}
-
-void StringConverter::convertDouble() {
-  convertDoubleToChar();
-  convertDoubleToInt();
-  convertDoubleToFloat();
-}
-
-void StringConverter::convertDoubleToChar() {
-  // need to implement
-}
-
-void StringConverter::convertDoubleToInt() {
-  // need to implement
-}
-
-void StringConverter::convertDoubleToFloat() {
-  // need to implement
-}
-
-void StringConverter::setAllImpossible() {
-  char_ss_ << kImpossibleMsg;
-  int_ss_ << kImpossibleMsg;
-  float_ss_ << kImpossibleMsg;
-  double_ss_ << kImpossibleMsg;
+void StringConverter::setDoubleSS() {
+  if (is_invalid_input) {
+    double_ss_ << kImpossibleMsg;
+  } else {
+    double_ss_ << double_val_;
+    std::string str_double_val_ = double_ss_.str();
+    if (str_double_val_.find(kDecimalPoint, kDoublePrompt.length()) == std::string::npos
+        && str_double_val_.find(kExponent, kDoublePrompt.length()) == std::string::npos
+        && !isnan(double_val_) && !isinf(double_val_)) {
+      double_ss_ << ".0";
+    }
+  }
 }
 
 std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter) {
