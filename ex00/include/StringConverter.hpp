@@ -35,6 +35,7 @@ class StringConverter {
   static const std::string kDoublePrompt;
   static const std::string kNonDisplayableMsg;
   static const std::string kImpossibleMsg;
+  static const std::string kDecimalPoint;
 
   StringConverter();
   StringConverter(const StringConverter &other);

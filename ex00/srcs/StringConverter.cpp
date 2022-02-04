@@ -6,6 +6,7 @@ const std::string StringConverter::kFloatPrompt = "float: ";
 const std::string StringConverter::kDoublePrompt = "double: ";
 const std::string StringConverter::kNonDisplayableMsg = "Non displayable";
 const std::string StringConverter::kImpossibleMsg = "impossible";
+const std::string StringConverter::kDecimalPoint = ".";
 
 StringConverter::StringConverter(const std::string &str)
     : str_(str), val_type_(kInvalidType), char_val_(), int_val_(),
@@ -63,7 +64,9 @@ bool StringConverter::isInt() const {
 }
 
 bool StringConverter::isFloat() const {
-  // need to implement
+  // char *str_end;
+  // double tmp = std::strtod(str_.c_str(), &str_end);
+  // if ()
   return false;
 }
 
@@ -177,12 +180,24 @@ void StringConverter::convertIntToChar() {
 
 void StringConverter::convertIntToFloat() {
   float_val_ = static_cast<float>(int_val_);
-  float_ss_ << float_val_ << ".0f";
+  float_ss_ << float_val_;
+  std::string str_float_val_ = float_ss_.str();
+  std::size_t found = str_float_val_.find(kDecimalPoint);
+  if (found == std::string::npos) {
+    float_ss_ << ".0f";
+  } else {
+    float_ss_ << "f";
+  }
 }
 
 void StringConverter::convertIntToDouble() {
   double_val_ = static_cast<double>(int_val_);
-  double_ss_ << double_val_ << ".0";
+  double_ss_ << double_val_;
+  std::string str_double_val_ = double_ss_.str();
+  std::size_t found = str_double_val_.find(kDecimalPoint);
+  if (found == std::string::npos) {
+    double_ss_ << ".0";
+  }
 }
 
 void StringConverter::convertFloat() {
