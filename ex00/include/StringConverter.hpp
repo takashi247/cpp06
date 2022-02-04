@@ -2,6 +2,8 @@
 #define STRINGCONVERTER_HPP
 
 #include <string>
+#include <iostream>
+#include <sstream>
 
 class StringConverter {
  public:
@@ -11,6 +13,10 @@ class StringConverter {
   void setValueType();
   void createBaseValue();
   void convertToOtherTypes();
+  const std::stringstream &getCharOS() const;
+  const std::stringstream &getIntOS() const;
+  const std::stringstream &getFloatOS() const;
+  const std::stringstream &getDoubleOS() const;
   void printValues() const;
 
  private:
@@ -19,6 +25,11 @@ class StringConverter {
   static const int kIntType = 2;
   static const int kFloatType = 3;
   static const int kDoubleType = 4;
+  static const std::string kCharPrompt;
+  static const std::string kIntPrompt;
+  static const std::string kFloatPrompt;
+  static const std::string kDoublePrompt;
+  static const std::string kNonDisplayableMsg;
 
   StringConverter();
   StringConverter(const StringConverter &other);
@@ -32,10 +43,22 @@ class StringConverter {
   void createIntValue();
   void createFloatValue();
   void createDoubleValue();
-  void convertToChar();
-  void convertToInt();
-  void convertToFloat();
-  void convertToDouble();
+  void convertChar();
+  void convertCharToInt();
+  void convertCharToFloat();
+  void convertCharToDouble();
+  void convertInt();
+  void convertIntToChar();
+  void convertIntToFloat();
+  void convertIntToDouble();
+  void convertFloat();
+  void convertFloatToChar();
+  void convertFloatToInt();
+  void convertFloatToDouble();
+  void convertDouble();
+  void convertDoubleToChar();
+  void convertDoubleToInt();
+  void convertDoubleToFloat();
   char getCharValue() const;
   int getIntValue() const;
   float getFloatValue() const;
@@ -47,6 +70,12 @@ class StringConverter {
   int int_val_;
   float float_val_;
   double double_val_;
+  std::stringstream char_ss_;
+  std::stringstream int_ss_;
+  std::stringstream float_ss_;
+  std::stringstream double_ss_;
 };
+
+std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter);
 
 #endif // STRINGCONVERTER_HPP

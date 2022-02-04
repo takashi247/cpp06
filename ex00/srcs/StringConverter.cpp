@@ -4,22 +4,31 @@
 #include <sstream>
 #include <iomanip>
 
+const std::string StringConverter::kCharPrompt = "char: ";
+const std::string StringConverter::kIntPrompt = "int: ";
+const std::string StringConverter::kFloatPrompt = "float: ";
+const std::string StringConverter::kDoublePrompt = "double: ";
+const std::string StringConverter::kNonDisplayableMsg = "Non displayable";
+
 StringConverter::StringConverter(const std::string &str)
-    : str_(str), val_type_(kInvalidType), char_val_(0), int_val_(0),
-      float_val_(0), double_val_(0) {
-  // std::cout << "StringConverter's default constructor called" << std::endl;
+    : str_(str), val_type_(kInvalidType), char_val_(), int_val_(),
+      float_val_(), double_val_(), char_ss_(), int_ss_(),
+      float_ss_(), double_ss_() {
+  char_ss_ << kCharPrompt;
+  int_ss_ << kIntPrompt;
+  float_ss_ << kFloatPrompt;
+  double_ss_ << kDoublePrompt;
 }
 
-StringConverter::~StringConverter() {
-  // std::cout << "StringConverter's destructor called" << std::endl;
-}
+StringConverter::~StringConverter() {}
 
-void StringConverter::printValues() const {
-  std::cout << "char: '" << char_val_ << "'" << std::endl;
-  std::cout << "int: " << int_val_ << std::endl;
-  std::cout << "float: " << std::fixed << std::setprecision(1) << float_val_ << "f" << std::endl;
-  std::cout << "double: " << std::setprecision(1) << double_val_ << std::endl;
-}
+const std::stringstream &StringConverter::getCharOS() const { return char_ss_; }
+
+const std::stringstream &StringConverter::getIntOS() const { return int_ss_; }
+
+const std::stringstream &StringConverter::getFloatOS() const { return float_ss_; }
+
+const std::stringstream &StringConverter::getDoubleOS() const { return double_ss_; }
 
 void StringConverter::setValueType() {
   if (isChar()) {
@@ -34,7 +43,14 @@ void StringConverter::setValueType() {
 }
 
 bool StringConverter::isChar() const {
-  // need to implement
+  // if the given string is NULL
+  if (str_.length() == 0) {
+    return true;
+  }
+  // len == 1 and NOT a digit
+  if (str_.length() == 1 && !std::isdigit(str_[0])) {
+    return true;
+  }
   return false;
 }
 
@@ -73,7 +89,12 @@ void StringConverter::createBaseValue() {
 }
 
 void StringConverter::createCharValue() {
-  // need to implement
+  char_val_ = static_cast<char>(str_[0]);
+  if (std::isprint(str_[0])) {
+    char_ss_ <<"'" << char_val_ << "'";
+  } else {
+    char_ss_ << kNonDisplayableMsg;
+  }
   return ;
 }
 
@@ -94,97 +115,103 @@ void StringConverter::createDoubleValue() {
 }
 
 void StringConverter::convertToOtherTypes() {
-  if (val_type_ != kCharType) {
-    convertToChar();
-  }
-  if (val_type_ != kIntType) {
-    convertToInt();
-  }
-  if (val_type_ != kFloatType) {
-    convertToFloat();
-  }
-  if (val_type_ != kDoubleType) {
-    convertToDouble();
-  }
-}
-
-void StringConverter::convertToChar() {
   switch (val_type_) {
     case kCharType:
+      convertChar();
       break;
     case kIntType:
-      char_val_ = static_cast<char>(int_val_);
+      convertInt();
       break;
     case kFloatType:
-      char_val_ = static_cast<char>(static_cast<int>(float_val_));
+      convertFloat();
       break;
     case kDoubleType:
-      char_val_ = static_cast<char>(static_cast<int>(double_val_));
+      convertDouble();
       break;
     default:
       break;
   }
 }
 
-void StringConverter::convertToInt() {
-  switch (val_type_) {
-    case kCharType:
-      // need to implement error handling
-      int_val_ = static_cast<int>(char_val_);
-      break;
-    case kIntType:
-      break;
-    case kFloatType:
-      // need to implement error handling
-      int_val_ = static_cast<int>(float_val_);
-      break;
-    case kDoubleType:
-      // need to implement error handling
-      int_val_ = static_cast<int>(double_val_);
-      break;
-    default:
-      break;
-  }
+void StringConverter::convertChar() {
+  convertCharToInt();
+  convertCharToFloat();
+  convertCharToDouble();
 }
 
-void StringConverter::convertToFloat() {
-  switch (val_type_) {
-    case kCharType:
-      // need to implement error handling
-      float_val_ = static_cast<float>(static_cast<int>(char_val_));
-      break;
-    case kIntType:
-      // need to implement error handling
-      float_val_ = static_cast<float>(int_val_);
-      break;
-    case kFloatType:
-      break;
-    case kDoubleType:
-      // need to implement error handling
-      float_val_ = static_cast<float>(static_cast<int>(double_val_));
-      break;
-    default:
-      break;
-  }
+void StringConverter::convertCharToInt() {
+  int_val_ = static_cast<int>(char_val_);
+  int_ss_ << int_val_;
 }
 
-void StringConverter::convertToDouble() {
-  switch (val_type_) {
-    case kCharType:
-      // need to implement error handling
-      double_val_ = static_cast<double>(static_cast<int>(char_val_));
-      break;
-    case kIntType:
-      // need to implement error handling
-      double_val_ = static_cast<double>(int_val_);
-      break;
-    case kFloatType:
-      // need to implement error handling
-      double_val_ = static_cast<double>(float_val_);
-      break;
-    case kDoubleType:
-      break;
-    default:
-      break;
-  }
+void StringConverter::convertCharToFloat() {
+  float_val_ = static_cast<float>(char_val_);
+  float_ss_ << float_val_ << ".0f";
+}
+
+void StringConverter::convertCharToDouble() {
+  double_val_ = static_cast<double>(char_val_);
+  double_ss_ << double_val_ << ".0";
+}
+
+void StringConverter::convertInt() {
+  convertIntToChar();
+  convertIntToFloat();
+  convertIntToDouble();
+}
+
+void StringConverter::convertIntToChar() {
+  // need to implement
+}
+
+void StringConverter::convertIntToFloat() {
+  // need to implement
+}
+
+void StringConverter::convertIntToDouble() {
+  // need to implement
+}
+
+void StringConverter::convertFloat() {
+  convertFloatToChar();
+  convertFloatToInt();
+  convertFloatToDouble();
+}
+
+void StringConverter::convertFloatToChar() {
+  // need to implement
+}
+
+void StringConverter::convertFloatToInt() {
+  // need to implement
+}
+
+void StringConverter::convertFloatToDouble() {
+  // need to implement
+}
+
+void StringConverter::convertDouble() {
+  convertDoubleToChar();
+  convertDoubleToInt();
+  convertDoubleToFloat();
+}
+
+void StringConverter::convertDoubleToChar() {
+  // need to implement
+}
+
+void StringConverter::convertDoubleToInt() {
+  // need to implement
+}
+
+void StringConverter::convertDoubleToFloat() {
+  // need to implement
+}
+
+std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter) {
+  os << s_converter.getCharOS().str() << "\n";
+  os << s_converter.getIntOS().str() << "\n";
+  os << s_converter.getFloatOS().str() << "\n";
+  os << s_converter.getDoubleOS().str();
+  return os;
 }
