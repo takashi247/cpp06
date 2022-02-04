@@ -64,6 +64,7 @@ class StringConverter {
   void convertDoubleToChar();
   void convertDoubleToInt();
   void convertDoubleToFloat();
+  void setAllImpossible();
   char getCharValue() const;
   int getIntValue() const;
   float getFloatValue() const;

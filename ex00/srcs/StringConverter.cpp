@@ -130,6 +130,7 @@ void StringConverter::convertToOtherTypes() {
       convertDouble();
       break;
     default:
+      setAllImpossible();
       break;
   }
 }
@@ -218,6 +219,13 @@ void StringConverter::convertDoubleToInt() {
 
 void StringConverter::convertDoubleToFloat() {
   // need to implement
+}
+
+void StringConverter::setAllImpossible() {
+  char_ss_ << kImpossibleMsg;
+  int_ss_ << kImpossibleMsg;
+  float_ss_ << kImpossibleMsg;
+  double_ss_ << kImpossibleMsg;
 }
 
 std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter) {
