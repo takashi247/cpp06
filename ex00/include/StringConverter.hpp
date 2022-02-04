@@ -4,6 +4,9 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <cstdlib>
+#include <limits>
 
 class StringConverter {
  public:
@@ -25,11 +28,13 @@ class StringConverter {
   static const int kIntType = 2;
   static const int kFloatType = 3;
   static const int kDoubleType = 4;
+  static const int kBase = 10;
   static const std::string kCharPrompt;
   static const std::string kIntPrompt;
   static const std::string kFloatPrompt;
   static const std::string kDoublePrompt;
   static const std::string kNonDisplayableMsg;
+  static const std::string kImpossibleMsg;
 
   StringConverter();
   StringConverter(const StringConverter &other);

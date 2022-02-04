@@ -1,14 +1,11 @@
 #include "StringConverter.hpp"
 
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-
 const std::string StringConverter::kCharPrompt = "char: ";
 const std::string StringConverter::kIntPrompt = "int: ";
 const std::string StringConverter::kFloatPrompt = "float: ";
 const std::string StringConverter::kDoublePrompt = "double: ";
 const std::string StringConverter::kNonDisplayableMsg = "Non displayable";
+const std::string StringConverter::kImpossibleMsg = "impossible";
 
 StringConverter::StringConverter(const std::string &str)
     : str_(str), val_type_(kInvalidType), char_val_(), int_val_(),
@@ -40,6 +37,8 @@ void StringConverter::setValueType() {
   } else if (isDouble()) {
     val_type_ = kDoubleType;
   }
+  // for debug
+  std::cout << val_type_ << std::endl;
 }
 
 bool StringConverter::isChar() const {
@@ -55,8 +54,12 @@ bool StringConverter::isChar() const {
 }
 
 bool StringConverter::isInt() const {
-  // need to implement
-  return true;
+  char *str_end;
+  long tmp = std::strtol(str_.c_str(), &str_end, kBase);
+  if (!*str_end && std::numeric_limits<int>::min() <= tmp && tmp <= std::numeric_limits<int>::max()) {
+    return true;
+  }
+  return false;
 }
 
 bool StringConverter::isFloat() const {
@@ -95,13 +98,11 @@ void StringConverter::createCharValue() {
   } else {
     char_ss_ << kNonDisplayableMsg;
   }
-  return ;
 }
 
 void StringConverter::createIntValue() {
-  // need to add error handling
-  std::istringstream iss(str_);
-  iss >> int_val_;
+  int_val_ = std::atoi(str_.c_str());
+  int_ss_ << int_val_;
 }
 
 void StringConverter::createFloatValue() {
@@ -161,15 +162,26 @@ void StringConverter::convertInt() {
 }
 
 void StringConverter::convertIntToChar() {
-  // need to implement
+  if (int_val_ < std::numeric_limits<char>::min() || std::numeric_limits<char>::max() < int_val_) {
+    char_ss_ << kImpossibleMsg;
+  } else {
+    char_val_ = static_cast<char>(int_val_);
+    if (std::isprint(static_cast<unsigned char>(char_val_))) {
+      char_ss_ << "'" << char_val_ << "'";
+    } else {
+      char_ss_ << kNonDisplayableMsg;
+    }
+  }
 }
 
 void StringConverter::convertIntToFloat() {
-  // need to implement
+  float_val_ = static_cast<float>(int_val_);
+  float_ss_ << float_val_ << ".0f";
 }
 
 void StringConverter::convertIntToDouble() {
-  // need to implement
+  double_val_ = static_cast<double>(int_val_);
+  double_ss_ << double_val_ << ".0";
 }
 
 void StringConverter::convertFloat() {
