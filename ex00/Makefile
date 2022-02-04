@@ -55,8 +55,8 @@ debug:		re
 shadow:		CXXFLAGS += $(SHADOW)
 shadow:		re
 
-test:			CXXFLAGS += $(TEST)
 test:			re
+	@cd test && bash convert_test.sh
 
 leaks:		CXXFLAGS += $(TEST) $(LEAKS)
 leaks:		re
