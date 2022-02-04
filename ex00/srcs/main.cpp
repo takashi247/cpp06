@@ -11,6 +11,6 @@ int main(int ac, char **av) {
   s_converter.setValueType();
   s_converter.createBaseValue();
   s_converter.convertToOtherTypes();
+  s_converter.setStringStreams();
   std::cout << s_converter << std::endl;
-  // s_converter.printValues();
 }
