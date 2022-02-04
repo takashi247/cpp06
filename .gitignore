@@ -33,3 +33,6 @@ convert
 *.exe
 *.out
 *.app
+
+# Config
+.vscode
