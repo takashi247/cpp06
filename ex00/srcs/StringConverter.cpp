@@ -8,7 +8,6 @@ const std::string StringConverter::kNonDisplayableMsg = "Non displayable";
 const std::string StringConverter::kImpossibleMsg = "impossible";
 const std::string StringConverter::kDecimalPoint = ".";
 const std::string StringConverter::kExponent="e";
-const double StringConverter::kEpsilon = 0.000001;
 
 StringConverter::StringConverter(const std::string &str)
     : str_(str), strtol_val_(), strtol_end_(NULL), strtod_val_(),
@@ -64,8 +63,7 @@ bool StringConverter::isChar() {
     double dcasted_char_min = static_cast<double>(std::numeric_limits<char>::min());
     double dcasted_char_max = static_cast<double>(std::numeric_limits<char>::max());
     if (strtol_val_ < lcasted_char_min || lcasted_char_max < strtol_val_
-        || strtod_val_ - dcasted_char_min < kEpsilon
-        || kEpsilon < strtod_val_ - dcasted_char_max
+        || strtod_val_ < dcasted_char_min || dcasted_char_max < strtod_val_
         || isnan(strtod_val_) || isinf(strtod_val_)) {
       is_out_of_range_char = true;
     }
@@ -79,8 +77,7 @@ bool StringConverter::isInt() {
   double dcasted_int_min = static_cast<double>(std::numeric_limits<int>::min());
   double dcasted_int_max = static_cast<double>(std::numeric_limits<int>::max());
   if (strtol_val_ < lcasted_int_min || lcasted_int_max < strtol_val_
-      || strtod_val_ - dcasted_int_min < kEpsilon
-      || kEpsilon < strtod_val_ - dcasted_int_max
+      || strtod_val_ < dcasted_int_min || dcasted_int_max < strtod_val_
       || isnan(strtod_val_) || isinf(strtod_val_)) {
     is_out_of_range_int = true;
     return false;
@@ -92,12 +89,14 @@ bool StringConverter::isInt() {
 }
 
 bool StringConverter::isinff() {
-  return (isinf(strtod_val_) && *strtod_end_ && *strtod_end_ == 'f'
+  return (isinf(strtod_val_) && *strtod_end_
+          && (*strtod_end_ == 'f' || *strtod_end_ == 'F')
           && !*(strtod_end_ + 1));
 }
 
 bool StringConverter::isnanf() {
-  return (isnan(strtod_val_) && *strtod_end_ && *strtod_end_ == 'f'
+  return (isnan(strtod_val_) && *strtod_end_
+          && (*strtod_end_ == 'f' || *strtod_end_ == 'F')
           && !*(strtod_end_ + 1));
 }
 
@@ -107,12 +106,12 @@ bool StringConverter::isFloat() {
   double dcasted_float_max = static_cast<double>(std::numeric_limits<float>::max());
   if ((isinf(fcasted_strtod_abs_val) && !isinf(strtod_abs_val))
       || (isnan(fcasted_strtod_abs_val) && !isnan(strtod_abs_val))
-      || (!isinf(strtod_abs_val) && !isnan(strtod_abs_val) && kEpsilon < strtod_abs_val - dcasted_float_max)) {
+      || (!isinf(strtod_abs_val) && !isnan(strtod_abs_val) && dcasted_float_max < strtod_abs_val)) {
     is_out_of_range_float = true;
     return false;
-  } else if (*strtod_end_ != 'f') {
+  } else if (*strtod_end_ != 'f' && *strtod_end_ != 'F') {
     return false;
-  } else if (isinff() || isnanf() || (*strtod_end_ == 'f' && !*(strtod_end_ + 1))) {
+  } else if (isinff() || isnanf() || ((*strtod_end_ == 'f' || *strtod_end_ == 'F') && !*(strtod_end_ + 1))) {
     return true;
   } else {
     return false;
