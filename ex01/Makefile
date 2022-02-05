@@ -27,10 +27,6 @@ DEBUG		:= -g# -fsanitize=address
 
 SHADOW	:= -Wshadow
 
-TEST		:= -D TEST=1
-
-LEAKS   := -D LEAKS=1
-
 all:		$(NAME)
 
 $(NAME):	$(OBJS)
@@ -55,12 +51,6 @@ debug:		re
 shadow:		CXXFLAGS += $(SHADOW)
 shadow:		re
 
-test:			re
-	@cd test && bash convert_test.sh
-
-leaks:		CXXFLAGS += $(TEST) $(LEAKS)
-leaks:		re
-
 -include $(DEPS)
 
-.PHONY:		all clean fclean re debug shadow test leaks
+.PHONY:		all clean fclean re debug shadow
