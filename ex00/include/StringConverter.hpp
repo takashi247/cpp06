@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <limits>
 #include <cerrno>
+#include <cmath>
 
 class StringConverter {
  public:
@@ -33,6 +34,7 @@ class StringConverter {
   static const int kFloatType = 3;
   static const int kDoubleType = 4;
   static const int kBase = 10;
+  static const double kEpsilon;
   static const std::string kCharPrompt;
   static const std::string kIntPrompt;
   static const std::string kFloatPrompt;
