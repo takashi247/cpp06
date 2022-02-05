@@ -53,8 +53,6 @@ void StringConverter::setValueType() {
     val_type_ = kInvalidType;
     is_invalid_input = true;
   }
-  // for debug
-  std::cout << val_type_ << std::endl;
 }
 
 bool StringConverter::isChar() {
