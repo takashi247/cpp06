@@ -4,6 +4,8 @@
 #include <stdlib.h> // for using srand, rand, and NULL
 #include <time.h> // for time
 
+#include <exception>
+
 #include "Base.hpp"
 #include "A.hpp"
 #include "B.hpp"
