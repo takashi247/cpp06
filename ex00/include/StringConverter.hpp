@@ -21,10 +21,10 @@ class StringConverter {
   void createBaseValue();
   void convertToOtherTypes();
   void setStringStreams();
-  const std::stringstream &getCharOS() const;
-  const std::stringstream &getIntOS() const;
-  const std::stringstream &getFloatOS() const;
-  const std::stringstream &getDoubleOS() const;
+  const std::stringstream &getCharSS() const;
+  const std::stringstream &getIntSS() const;
+  const std::stringstream &getFloatSS() const;
+  const std::stringstream &getDoubleSS() const;
   void printValues() const;
 
  private:
@@ -59,7 +59,6 @@ class StringConverter {
   void setDoubleSS();
 
   const std::string &str_;
-  long strtol_val_;
   char* strtol_end_;
   double strtod_val_;
   char* strtod_end_;

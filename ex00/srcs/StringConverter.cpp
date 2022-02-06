@@ -10,17 +10,17 @@ const std::string StringConverter::kDecimalPoint = ".";
 const std::string StringConverter::kExponent="e";
 
 StringConverter::StringConverter(const std::string &str)
-    : str_(str), strtol_val_(), strtol_end_(NULL), strtod_val_(),
-      strtod_end_(NULL), val_type_(), char_val_(), int_val_(),
-      float_val_(), double_val_(), char_ss_(), int_ss_(), float_ss_(),
-      double_ss_(), is_out_of_range_char(false), is_out_of_range_int(false),
+    : str_(str),  strtol_end_(NULL), strtod_val_(), strtod_end_(NULL),
+      val_type_(), char_val_(), int_val_(), float_val_(), double_val_(),
+      char_ss_(), int_ss_(), float_ss_(), double_ss_(),
+      is_out_of_range_char(false), is_out_of_range_int(false),
       is_out_of_range_float(false), is_invalid_input(false) {
   strtod_val_ = std::strtod(str_.c_str(), &strtod_end_);
   if (errno == ERANGE && strtod_val_ == HUGE_VAL) {
     is_invalid_input = true;
     errno = 0;
   }
-  strtol_val_ = std::strtol(str_.c_str(), &strtol_end_, kBase);
+  std::strtol(str_.c_str(), &strtol_end_, kBase);
   char_ss_ << kCharPrompt;
   int_ss_ << kIntPrompt;
   float_ss_ << kFloatPrompt;
@@ -29,13 +29,13 @@ StringConverter::StringConverter(const std::string &str)
 
 StringConverter::~StringConverter() {}
 
-const std::stringstream &StringConverter::getCharOS() const { return char_ss_; }
+const std::stringstream &StringConverter::getCharSS() const { return char_ss_; }
 
-const std::stringstream &StringConverter::getIntOS() const { return int_ss_; }
+const std::stringstream &StringConverter::getIntSS() const { return int_ss_; }
 
-const std::stringstream &StringConverter::getFloatOS() const { return float_ss_; }
+const std::stringstream &StringConverter::getFloatSS() const { return float_ss_; }
 
-const std::stringstream &StringConverter::getDoubleOS() const { return double_ss_; }
+const std::stringstream &StringConverter::getDoubleSS() const { return double_ss_; }
 
 void StringConverter::setValueType() {
   if (is_invalid_input) {
@@ -58,13 +58,10 @@ bool StringConverter::isChar() {
   if ((str_.length() == 0) || (str_.length() == 1 && !std::isdigit(str_[0]))) {
     return true;
   } else {
-    long lcasted_char_min = static_cast<long>(std::numeric_limits<char>::min());
-    long lcasted_char_max = static_cast<long>(std::numeric_limits<char>::max());
     double dcasted_char_min = static_cast<double>(std::numeric_limits<char>::min());
     double dcasted_char_max = static_cast<double>(std::numeric_limits<char>::max());
-    if (strtol_val_ < lcasted_char_min || lcasted_char_max < strtol_val_
-        || strtod_val_ < dcasted_char_min || dcasted_char_max < strtod_val_
-        || isnan(strtod_val_) || isinf(strtod_val_)) {
+    if(strtod_val_ < dcasted_char_min || dcasted_char_max < strtod_val_
+       || isnan(strtod_val_) || isinf(strtod_val_)) {
       is_out_of_range_char = true;
     }
     return false;
@@ -72,13 +69,10 @@ bool StringConverter::isChar() {
 }
 
 bool StringConverter::isInt() {
-  long lcasted_int_min = static_cast<long>(std::numeric_limits<int>::min());
-  long lcasted_int_max = static_cast<long>(std::numeric_limits<int>::max());
   double dcasted_int_min = static_cast<double>(std::numeric_limits<int>::min());
   double dcasted_int_max = static_cast<double>(std::numeric_limits<int>::max());
-  if (strtol_val_ < lcasted_int_min || lcasted_int_max < strtol_val_
-      || strtod_val_ < dcasted_int_min || dcasted_int_max < strtod_val_
-      || isnan(strtod_val_) || isinf(strtod_val_)) {
+  if(strtod_val_ < dcasted_int_min || dcasted_int_max < strtod_val_
+     || isnan(strtod_val_) || isinf(strtod_val_)) {
     is_out_of_range_int = true;
     return false;
   } else if (*strtol_end_) {
@@ -230,9 +224,9 @@ void StringConverter::setDoubleSS() {
 }
 
 std::ostream &operator<<(std::ostream &os, const StringConverter &s_converter) {
-  os << s_converter.getCharOS().str() << "\n";
-  os << s_converter.getIntOS().str() << "\n";
-  os << s_converter.getFloatOS().str() << "\n";
-  os << s_converter.getDoubleOS().str();
+  os << s_converter.getCharSS().str() << "\n";
+  os << s_converter.getIntSS().str() << "\n";
+  os << s_converter.getFloatSS().str() << "\n";
+  os << s_converter.getDoubleSS().str();
   return os;
 }
